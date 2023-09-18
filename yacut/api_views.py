@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flask import jsonify, request
 
 from . import app, db
@@ -17,18 +19,18 @@ def create_url():
         data['custom_id'] = get_unique_short_id()
     elif URLMap.query.filter_by(short=data['custom_id']).first():
         raise InvalidAPIUsage(f'Имя "{data["custom_id"]}" уже занято.')
-    elif not check_custom_id(data['custom_id']):
+    if not check_custom_id(data['custom_id']):
         raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки')
     new_link = URLMap()
     new_link.from_dict(data)
     db.session.add(new_link)
     db.session.commit()
-    return jsonify(new_link.to_dict()), 201
+    return jsonify(new_link.to_dict()), HTTPStatus.CREATED
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
 def redirect_original_url(short_id):
     url = URLMap.query.filter_by(short=short_id).first()
     if url is None:
-        raise InvalidAPIUsage('Указанный id не найден', 404)
-    return jsonify(url=url.original), 200
+        raise InvalidAPIUsage('Указанный id не найден', HTTPStatus.NOT_FOUND)
+    return jsonify(url=url.original), HTTPStatus.OK
