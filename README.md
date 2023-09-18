@@ -88,6 +88,7 @@ Response
 {
   "url": "https://www.python.org/success-stories/category/software-development/"
 }
+```
 
 ### Автор
 Гашев Константин
